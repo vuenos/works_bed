@@ -14,7 +14,7 @@ app.use(cors());
 app.use("/api/users", userRoute);
 
 app.get("/", (req, res) => {
-  res.send(`<h1>Running Works APIs... 🚀</h1>`);
+  res.send(`<h1>Works Running Works APIs... 🚀</h1>`);
 });
 
 const port = process.env.PORT || 5600;
