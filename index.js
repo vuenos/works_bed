@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
   res.send(`<h1>Works Running Works APIs... 🚀</h1>`);
 });
 
-const port = process.env.PORT || 5600;
+const port = process.env.PORT || 5000;
 const uri = process.env.ATLAS_URI;
 
 app.listen(port, (req, res) => {
