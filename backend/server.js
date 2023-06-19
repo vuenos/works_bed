@@ -16,7 +16,7 @@ dotenv.config();
 
 connectDB();
 
-if (process.env.MODE_ENV === "development") {
+if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
@@ -30,7 +30,7 @@ app.use("/api/users", userRoutes);
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
-if (process.env.MODE_ENV === "production") {
+if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/build")));
 
   app.get("*", (req, res) =>
@@ -49,7 +49,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(
-    `Server running in ${process.env.MODE_ENV} mode on port ${PORT}`.yellow
+    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow
       .bold,
   );
 });
