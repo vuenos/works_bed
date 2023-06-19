@@ -17,20 +17,20 @@ app.get("/", (req, res) => {
   res.send(`<h1>Works Running Works APIs... 🚀</h1>`);
 });
 
-const port = process.env.PORT || 5000;
-const uri = process.env.ATLAS_URI;
+const PORT = process.env.PORT || 5000;
+const uri = process.env.MONGO_URI;
 
-app.listen(port, (req, res) => {
+app.listen(PORT, (req, res) => {
   console.log(
-    `Server running in ${process.env.MODE_ENV} mode on port ${port}`.yellow.bold
+    `Server running in ${process.env.MODE_ENV} mode on port ${PORT}`.yellow.bold
   );
 });
 
 // MongoDB Connect
-mongoose
-  .connect(uri, {
-    useNewUrlParser: true,
+mongoose.connect(uri, {
     useUnifiedTopology: true,
+    useNewUrlParser: true,
+    // useCreateIndex: true,
   })
   .then(() => console.log("MongoDB Connection Success!! 👏👏".blue.bold))
   .catch((error) => {
