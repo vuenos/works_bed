@@ -38,7 +38,7 @@ if (process.env.NODE_ENV === "production") {
   );
 } else {
   app.get("/", (req, res) => {
-    res.send(`<h1>Running Works APIs... 🚀</h1>`);
+    res.send(`<h1>Running Works API Server... 🚀</h1>`);
   });
 }
 
