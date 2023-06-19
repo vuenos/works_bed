@@ -1,61 +1,77 @@
 import asyncHandler from "express-async-handler";
+import userModel from "../models/userModel.js";
+import bcrypt from "bcryptjs";
+import validator from "validator";
 import generateToken from "../utils/generateToken.js";
 import User from "../models/userModel.js";
+import jwt from "jsonwebtoken";
+
+const createToken = (_id) => {
+  const jwtkey = process.env.JWT_SECRET_KEY;
+  return jwt.sign({ _id }, jwtkey, { expiresIn: "3d" });
+};
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
 // @access  Public
-const authUser = asyncHandler(async (req, res) => {
+const authUser = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  try {
+    let user = await userModel.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(401);
-    throw new Error("Invalid email or password");
+    if (!user) return res.status(400).json("Input your email...");
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword)
+      return res.status(400).json("Invalid email or password...");
+
+    const token = createToken(user._id);
+    res.status(200).json({ _id: user._id, name: user.name, email, token });
+  } catch (error) {
+    console.log(error);
+    res.status(500).join(error);
   }
-});
+};
 
 // @desc    Register a new user
 // @route   POST /api/users
 // @access  Public
-const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
 
-  const userExists = await User.findOne({ email });
+    let user = await userModel.findOne({ email });
 
-  if (userExists) {
-    res.status(400);
-    throw new Error("User already exists");
+    if (user)
+      return res.status(400).json("User with the given email already exits...");
+
+    if (!name || !email || !password)
+      return res.status(400).json("All fields are required...");
+
+    if (!validator.isEmail(email))
+      return res.status(400).json("Email must be a valid email...");
+
+    if (!validator.isStrongPassword(password))
+      return res.status(400).json("Password be a strong password...");
+
+    user = new userModel({ name, email, password });
+
+    const salt = await bcrypt.genSalt(10);
+
+    user.password = await bcrypt.hash(user.password, salt);
+
+    await user.save();
+
+    const token = createToken(user._id);
+
+    res.status(200).json({ _id: user._id, name, email, token });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
   }
-
-  const user = await User.create({
-    name,
-    email,
-    password,
-  });
-
-  if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("Invalid user data");
-  }
-});
+};
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
